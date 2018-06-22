@@ -10,9 +10,10 @@ import android.view.WindowManager;
 
 public abstract class SecureTimerActivity extends AppCompatActivity implements SecureTimerListener {
 
-    private int mSecondsInFinished;
-    private int mSecondsInWarning;
-    private SecureTimerHandler mHandler;
+    private int mSecondsInFinished = SecureTimerContext.SECONDS_DEFAULT_FINISHED;
+    private int mSecondsInWarning = SecureTimerContext.SECONDS_DEFAULT_WARNING;
+
+    private final SecureTimerHandler mHandler = new SecureTimerHandler(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,13 +24,12 @@ public abstract class SecureTimerActivity extends AppCompatActivity implements S
     protected void setSecureTimer(int secondsUntilFinished, int secondsInWarning) {
         mSecondsInFinished = secondsUntilFinished;
         mSecondsInWarning = secondsInWarning;
-        mHandler = new SecureTimerHandler(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        startTimer();
+        sendStart();
     }
 
     @Override
@@ -41,21 +41,19 @@ public abstract class SecureTimerActivity extends AppCompatActivity implements S
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            startTimer();
+            sendStart();
         }
         return super.dispatchTouchEvent(event);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        startTimer();
+        sendStart();
         return super.onKeyDown(keyCode, event);
     }
 
-    private void startTimer() {
-        if (mHandler != null) {
-            mHandler.sendMessage(Message.obtain(null, SecureTimerContext.MSG_START, mSecondsInFinished, mSecondsInWarning));
-        }
+    private void sendStart() {
+        mHandler.sendMessage(Message.obtain(null, SecureTimerContext.MSG_START, mSecondsInFinished, mSecondsInWarning));
     }
 
     @Override
